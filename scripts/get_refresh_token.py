@@ -31,19 +31,23 @@ def get_authorization_code(
     client_id: str,
     scope: str,
 ) -> str:
-    url_ext = "authorize"
+    url_ext = "authorize?"
     url = urljoin(base=ACCOUNTS_BASE_URL, url=url_ext)
 
     params = GetAuthenticationCodeParams(
         client_id=client_id, redirect_uri=REDIRECT_URI, scope=scope
-    )
+    ).model_dump()
 
     response = requests.get(url=url, params=params, timeout=30)
-    authentication_code = input(
-        f"Paste this URL into your browser.....\n{response.url}\nYou will be redirected"
-        " to a URL with the authentication code in it. Enter your authentication code"
-        " here:"
-    )
+    authentication_code = input(f"""
+    Paste this URL into your browser.....
+    
+    {response.url}
+
+    You may be asked to sign into spotify, after which you will be redirected to a 
+    URL with the authentication code in it.
+
+    Enter your authentication code here:""")
 
     return authentication_code
 
