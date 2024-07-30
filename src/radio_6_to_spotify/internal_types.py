@@ -71,7 +71,7 @@ class Track:
     # tracks are already in the playlist, because the same track may appear in multiple
     # albums, each with a different ID.
     def __hash__(self) -> int:
-        artist_names = tuple(artist.name for artist in self.artists)
+        artist_names = tuple(sorted(artist.name for artist in self.artists))
         return hash((self.name, artist_names))
 
     def __eq__(self, other) -> bool:

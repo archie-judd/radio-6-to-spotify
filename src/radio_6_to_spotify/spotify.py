@@ -259,8 +259,17 @@ class Spotify:
         response = self.api_call(
             url=url, method="get", headers=self.authorization_headers
         )
-
-        playlist = PlaylistModel.model_validate(response.json())
+        response_json = response.json()
+        playlist = PlaylistModel.model_validate(response_json)
+        next = response_json["tracks"].get("next")
+        while next is not None:
+            response = self.api_call(
+                url=next, method="get", headers=self.authorization_headers
+            )
+            response_json = response.json()
+            next = response_json.get("next")
+            tracks = TracksWithMetaModel.model_validate(response.json())
+            playlist.tracks.items.extend(tracks.items)
 
         return playlist
 
