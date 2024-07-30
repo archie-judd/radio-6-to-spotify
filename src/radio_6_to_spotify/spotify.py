@@ -6,6 +6,8 @@ from urllib.parse import urljoin
 import requests
 from pydantic import BaseModel
 
+import radio_6_to_spotify.utils as utils
+
 logger = logging.getLogger(__name__)
 
 
@@ -278,13 +280,14 @@ class Spotify:
         url_ext = f"{self.version}/playlists/{playlist_id}/tracks"
         url = urljoin(base=self.base_url, url=url_ext)
 
-        params = AddItemsToPlaylistParams(uris=",".join(track_uris)).model_dump()
+        for _track_uris in utils.batch_list(track_uris, batch_size=100):
+            params = AddItemsToPlaylistParams(uris=",".join(_track_uris)).model_dump()
 
-        logger.debug("Adding: %s", params)
+            logger.debug("Adding: %s", params)
 
-        self.api_call(
-            url, method="post", headers=self.authorization_headers, params=params
-        )
+            self.api_call(
+                url, method="post", headers=self.authorization_headers, params=params
+            )
 
     @check_access_token
     def remove_from_playlist(self, playlist_id: str, track_uris: list[str]):
@@ -296,16 +299,15 @@ class Spotify:
 
         tracks = [TrackURI(uri=uri) for uri in track_uris]
 
-        data = RemovePlaylistItemsBody(tracks=tracks).model_dump()
-
-        logger.debug("Removing : %s", data)
-
-        self.api_call(
-            url=url,
-            method="delete",
-            headers=headers,
-            json=data,
-        )
+        for _tracks in utils.batch_list(tracks, batch_size=100):
+            data = RemovePlaylistItemsBody(tracks=_tracks).model_dump()
+            logger.debug("Removing : %s", data)
+            self.api_call(
+                url=url,
+                method="delete",
+                headers=headers,
+                json=data,
+            )
 
     @check_access_token
     def change_playlist_details(
