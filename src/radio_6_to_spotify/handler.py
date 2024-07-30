@@ -4,6 +4,7 @@ import re
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
+from dotenv import load_dotenv
 from pydantic import BaseModel
 
 from radio_6_to_spotify.internal_types import Playlist, Track
@@ -21,6 +22,7 @@ class Environment(BaseModel):
     SPOTIFY_RADIO_6_ARCHIVE_PLAYLIST_ID: str
 
 
+load_dotenv()
 ENVIRONMENT = Environment.model_validate(os.environ)
 SPECIAL_CHARACTERS_PATTEN = r"[^ \w+-.]"
 

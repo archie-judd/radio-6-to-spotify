@@ -23,21 +23,6 @@ class AddItemsToPlaylistParams(BaseModel):
     uris: str
 
 
-class GetAuthenticationCodeParams(BaseModel):
-    client_id: str
-    redirect_uri: str
-    scope: str
-    response_type: Literal["code"] = "code"
-
-
-class GetRefreshTokenBody(BaseModel):
-    code: str
-    client_id: str
-    client_secret: str
-    redirect_uri: str
-    grant_type: Literal["authorization_code"] = "authorization_code"
-
-
 class GetAccessTokenBody(BaseModel):
     refresh_token: str
     client_id: str
@@ -194,44 +179,6 @@ class Spotify:
     def authorization_headers(self) -> dict:
         headers = {"Authorization": "Bearer {}".format(self.access_token)}
         return headers
-
-    @classmethod
-    def get_authorization_code(
-        cls, client_id: str, scope: str, redirect_uri: str = "http://localhost/"
-    ) -> None:
-        url_ext = "authorize"
-        url = urljoin(base=cls.accounts_base_url, url=url_ext)
-
-        params = GetAuthenticationCodeParams(
-            client_id=client_id, redirect_uri=redirect_uri, scope=scope
-        )
-
-        response = requests.get(url=url, params=params, timeout=30)
-        print(
-            f"Paste this URL into your browser.....\n{response.url}\nYou will be"
-            " redirected to a URL with the authentication code in it."
-        )
-
-    @classmethod
-    def get_refresh_token(
-        cls,
-        authentication_code: str,
-        client_id: str,
-        client_secret: str,
-        redirect_uri: str = "http://localhost/",
-    ):
-        url_ext = "api/token"
-        url = urljoin(base=cls.accounts_base_url, url=url_ext)
-        body = GetRefreshTokenBody(
-            code=authentication_code,
-            client_id=client_id,
-            client_secret=client_secret,
-            redirect_uri=redirect_uri,
-        ).model_dump()
-
-        response = requests.post(url=url, data=body, timeout=30)
-        print(response.json())
-        print("ts:\n{}".format(time.time()))
 
     def get_new_access_token(self):
         logger.debug("Getting new access_token")

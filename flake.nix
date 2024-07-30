@@ -22,6 +22,9 @@
             bs4 = super.bs4.overridePythonAttrs (old: {
               buildInputs = (old.buildInputs or [ ]) ++ [ super.setuptools ];
             });
+            matplotlib = super.matplotlib.overridePythonAttrs (old: {
+              buildInputs = (old.buildInputs or [ ]) ++ [ super.meson ];
+            });
           });
         };
       in {
