@@ -10,8 +10,6 @@ from radio_6_to_spotify.internal_types import Playlist, Track
 from radio_6_to_spotify.scrape import scrape_radio_6_playlist_tracks
 from radio_6_to_spotify.spotify import Spotify
 
-logger = logging.getLogger(__name__)
-
 
 class Environment(BaseModel):
     SPOTIFY_CLIENT_ID: str
@@ -109,7 +107,7 @@ def update_playlist_with_current_tracks(
     uris_to_add = [track.uri for track in tracks_to_add]
 
     if uris_to_add:
-        logger.info(
+        logging.info(
             "Addings these tracks: %s to playlist: %s",
             [track.name for track in tracks_to_add],
             playlist_id,
@@ -120,7 +118,7 @@ def update_playlist_with_current_tracks(
         tracks_to_remove = existing_tracks.difference(current_tracks)
         uris_to_remove = [track.uri for track in tracks_to_remove]
         if uris_to_remove:
-            logger.info(
+            logging.info(
                 "Removing these tracks: %s to playlist: %s",
                 [track.name for track in tracks_to_remove],
                 playlist_id,
@@ -136,9 +134,15 @@ def update_playlist_with_current_tracks(
     )
 
 
-def handler():
+def synch_playlists():
 
-    logger.info("Starting")
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s: %(name)s - %(levelname)s - %(message)s",
+        datefmt="%Y-%m-%dT%H:%M:%S %Z",
+    )
+
+    logging.info("Starting")
 
     spotify_client = Spotify(
         client_id=ENVIRONMENT.SPOTIFY_CLIENT_ID,
@@ -163,13 +167,4 @@ def handler():
         remove_outdated_tracks=False,
     )
 
-    logger.info("Done")
-
-
-if __name__ == "__main__":
-    logging.basicConfig(
-        level=logging.INFO,
-        format="%(asctime)s: %(name)s - %(levelname)s - %(message)s",
-        datefmt="%Y-%m-%dT%H:%M:%S %Z",
-    )
-    handler()
+    logging.info("Done")
