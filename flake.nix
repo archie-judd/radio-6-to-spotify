@@ -13,24 +13,33 @@
       let
         pkgs = nixpkgs.legacyPackages.${system};
         _poetry2nix = poetry2nix.lib.mkPoetry2Nix { inherit pkgs; };
-        my_env = _poetry2nix.mkPoetryEnv {
+        overrides = _poetry2nix.defaultPoetryOverrides.extend (self: super: {
+          bs4 = super.bs4.overridePythonAttrs (old: {
+            buildInputs = (old.buildInputs or [ ]) ++ [ super.setuptools ];
+          });
+          matplotlib = super.matplotlib.overridePythonAttrs (old: {
+            buildInputs = (old.buildInputs or [ ]) ++ [ super.meson ];
+          });
+        });
+        myEnv = _poetry2nix.mkPoetryEnv {
           projectDir = ./.;
           editablePackageSources = {
             radio_6_to_spotify = "${builtins.getEnv "PWD"}/src";
           };
-          overrides = _poetry2nix.defaultPoetryOverrides.extend (self: super: {
-            bs4 = super.bs4.overridePythonAttrs (old: {
-              buildInputs = (old.buildInputs or [ ]) ++ [ super.setuptools ];
-            });
-            matplotlib = super.matplotlib.overridePythonAttrs (old: {
-              buildInputs = (old.buildInputs or [ ]) ++ [ super.meson ];
-            });
-          });
+          overrides = overrides;
+        };
+        myApp = _poetry2nix.mkPoetryApplication {
+          projectDir = ./.;
+          overrides = overrides;
         };
       in {
         devShells.default = pkgs.mkShell {
-          inputsFrom = [ my_env.env ];
+          inputsFrom = [ myEnv.env ];
           packages = [ pkgs.poetry ];
+        };
+        apps.default = {
+          type = "app";
+          program = "${myApp}/bin/sync_playlists";
         };
       });
 }

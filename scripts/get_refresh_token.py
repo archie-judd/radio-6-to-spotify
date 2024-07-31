@@ -3,7 +3,6 @@ from typing import Literal
 from urllib.parse import urljoin
 
 import requests
-from dotenv import load_dotenv
 from pydantic import BaseModel
 
 
@@ -71,7 +70,7 @@ def get_refresh_token(
 
 
 if __name__ == "__main__":
-    load_dotenv()
+
     client_id = os.environ["SPOTIFY_CLIENT_ID"]
     client_secret = os.environ["SPOTIFY_CLIENT_SECRET"]
     authorization_code = get_authorization_code(client_id=client_id, scope=SCOPE)
